@@ -1,0 +1,100 @@
+﻿<Window x:Name="window" x:Class="FileManager.MainWindow" 
+        ResizeMode="CanMinimize"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileManager"
+        xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="MainWindow" Height="500" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="400"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="600"/>
+                <ColumnDefinition Width="90"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Button Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                        Width="90"
+                        Height="25"
+                        Click="Button_Click">
+                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">Back</TextBlock>
+                </Button>
+            </Grid>
+            <Grid Grid.Column="1">
+                <TextBox x:Name="textBox" IsReadOnly="True" Width="590" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" >text</TextBox>
+            </Grid>
+
+            <Grid Grid.Column="2" >
+                <Button Height="25" Width="80" Margin="0,0,5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+    
+                </Button>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <ListView Name="phonesList" ItemsSource="{Binding components}"
+                      MouseDoubleClick="ListView_MouseDoubleClick"
+                      SelectionChanged="phonesList_SelectionChanged">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding name}" Width="300">Имя</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding lastWriteDate}" Width="150">Дата изменения</GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding extension}" Width="150">Расширение</GridViewColumn>
+                    </GridView>
+                </ListView.View>
+                <!-->
+                <ListView.Resources>
+                    <col:ArrayList x:Key="phones" >
+                        <ListViewItem>
+                            <local:Phone  Title="iPhone 6S" Company="Apple" Price="54990" />
+                        </ListViewItem>
+                        <local:Phone  Title="iPhone 6S" Company="Apple" Price="54990" />
+                        <local:Phone Title="Lumia 950" Company="Microsoft" Price="39990" />
+                        <local:Phone Title="Nexus 5X" Company="Google" Price="29990" />
+                        <local:Phone Title = "Galaxy Edge" Company = "Samsung" Price = "45670" />
+                    </col:ArrayList>
+                </ListView.Resources>
+                </!-->
+            </ListView>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="500"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
+                    <TextBlock VerticalAlignment="Center">FileName</TextBlock>
+                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">--</TextBlock>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="24*"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,5,0" Grid.ColumnSpan="2">
+                    <TextBlock>FileType</TextBlock>
+                    <TextBlock x:Name="filetype" Margin="10,0,0,0">--</TextBlock>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</Window>
