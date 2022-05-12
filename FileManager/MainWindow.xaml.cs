@@ -20,14 +20,14 @@ namespace FileManager
     public partial class MainWindow : Window
     {
         private int SelectedIndex = -1;
-        public List<Info> components { get; set; }
+        public List<ItemModel> Items { get; set; }
         private Stack<string> LastElements;
         public MainWindow()
         {
-            components = new List<Info>();
+            Items = new List<ItemModel>();
             LastElements = new Stack<string>();
             InitializeComponent();
-            ShowDirs.openDrives(components);
+            ShowDirs.openDrives(Items);
             DataContext = this;
         }
 
@@ -39,7 +39,7 @@ namespace FileManager
                 {
                     ListView view = (ListView)sender;
                     int index = view.SelectedIndex;
-                    ShowDirs.openFileOrDir(index, components, LastElements);
+                    ShowDirs.openFileOrDir(index, Items, LastElements);
                 }
                 catch (Exception ex)
                 {
@@ -93,38 +93,47 @@ namespace FileManager
         {
             if(LastElements.Count>0)
             {
-                ShowDirs.openFileOrDir(LastElements.Pop(), components);
+                ShowDirs.openFileOrDir(LastElements.Pop(), Items);
                 phonesList.Items.Refresh();
-                if (LastElements.Count > 0) textBox.Text = Directory.GetParent((components[0].Element.ToString())).ToString();
+                if (LastElements.Count > 0) textBox.Text = Directory.GetParent((Items[0].Element.ToString())).ToString();
             }
         }
 
         private void phonesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(LastElements.Count>0 && components.Count>0) textBox.Text = Directory.GetParent((components[0].Element.ToString())).ToString();
+            if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent((Items[0].Element.ToString())).ToString();
         }
     }
 
-    public class Info
+    public class ItemModel
     {
-        public Info(string name, string date, object Element)
+        public ItemModel(string name, string date, object Element)
         {
             this.name = name;
             lastWriteDate = date;
             this.Element = Element;
         }
 
-        public Info(string name, string date,string extension, object Element)
+        public ItemModel(string name, string date, object Element, ImageSource imageSource)
+        {
+            this.Image=imageSource;
+            this.name = name;
+            lastWriteDate = date;
+            this.Element = Element;
+        }
+
+        public ItemModel(string name, string date,string extension, object Element, ImageSource imageSource)
         {
             this.name = name;
             this.extension = extension;
             this.Element = Element;
+            this.Image = imageSource;
             lastWriteDate = date;
         }
-        public string name { get; set; } = "";
-        public string lastWriteDate { get; set; }="";
+        public string name { get; set; } = String.Empty;
+        public string lastWriteDate { get; set; }=String.Empty;
         public object Element { get; set; } = null;
-
-        public string extension { get; set; } = "";
+        public string extension { get; set; } = String.Empty;
+        public ImageSource Image { get; set; } = null;
     }
 }

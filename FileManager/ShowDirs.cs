@@ -1,27 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace FileManager
 {
     internal static class ShowDirs
     {
-        public static void openDrives(List<Info> components)
+        public static void openDrives(List<ItemModel> components)
         {
             components.Clear();
             DriveInfo[] drives = DriveInfo.GetDrives();
             foreach (DriveInfo drive in drives)
             {
-                Info info = new Info(drive.Name, drive.DriveType.ToString(), drive);
+                //ImageSource image = CreateIcon(drive.Name);
+                ItemModel info = new ItemModel(drive.Name, drive.DriveType.ToString(), drive);
                 components.Add(info);
             }
         }
 
-        public static void openFileOrDir(int index, List<Info> components, Stack<string> LastElements)
+        public static void openFileOrDir(int index, List<ItemModel> components, Stack<string> LastElements)
         {
             if (index == -1) return;
             if (components[index].Element.GetType() == typeof(DriveInfo))
@@ -33,13 +37,16 @@ namespace FileManager
                 foreach (string dir in dirs)
                 {
                     DirectoryInfo directoryInfo = new DirectoryInfo(dir);
-                    Info info = new Info(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo);
+                    ImageSource image = createIconForFolders(dir);
+                    ItemModel info = new ItemModel(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo, image);
                     components.Add(info);
                 }
                 foreach (string file in Directory.GetFiles(path))
                 {
                     FileInfo fileInfo = new FileInfo(file);
-                    Info info = new Info(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(),fileInfo.Extension, fileInfo);
+                    ImageSource image = createIconForFiles(fileInfo.FullName);
+                    if (!fileInfo.Exists) continue;
+                    ItemModel info = new ItemModel(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(),fileInfo.Extension, fileInfo, image);
                     components.Add(info);
                 }
                 return;
@@ -53,13 +60,16 @@ namespace FileManager
                 foreach (string dir in dirs)
                 {
                     DirectoryInfo directoryInfo = new DirectoryInfo(dir);
-                    Info info = new Info(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo);
+                    ImageSource image = createIconForFolders(dir);
+                    ItemModel info = new ItemModel(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo, image);
                     components.Add(info);
                 }
                 foreach (string file in Directory.GetFiles(path))
                 {
                     FileInfo fileInfo = new FileInfo(file);
-                    Info info = new Info(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(), fileInfo.Extension , fileInfo);
+                    ImageSource image = createIconForFiles(fileInfo.FullName);
+                    if (!fileInfo.Exists) continue;
+                    ItemModel info = new ItemModel(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(), fileInfo.Extension , fileInfo, image);
                     components.Add(info);
                 }
                 return;
@@ -73,7 +83,7 @@ namespace FileManager
             }
         }
 
-        public static void openFileOrDir(string lastElement, List<Info> components)
+        public static void openFileOrDir(string lastElement, List<ItemModel> components)
         {
             if (lastElement == "drive")
             {
@@ -87,15 +97,51 @@ namespace FileManager
             foreach (string dir in dirs)
             {
                 DirectoryInfo directoryInfo = new DirectoryInfo(dir);
-                Info info = new Info(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo);
+                ImageSource image = createIconForFolders(dir);
+                ItemModel info = new ItemModel(directoryInfo.Name, directoryInfo.LastWriteTime.ToShortDateString(), directoryInfo,image);
                 components.Add(info);
             }
             foreach (string file in Directory.GetFiles(path))
             {
                 FileInfo fileInfo = new FileInfo(file);
-                Info info = new Info(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(), fileInfo);
+                if (!fileInfo.Exists) continue;
+                ImageSource image=createIconForFiles(fileInfo.FullName);
+                ItemModel info = new ItemModel(fileInfo.Name, fileInfo.LastWriteTime.ToShortDateString(), fileInfo.Extension,fileInfo, image);
                 components.Add(info);
             }
+        }
+
+        private static ImageSource createIconForFiles(string path)
+        {
+            ImageSource image = null;
+            Icon icon = Icon.ExtractAssociatedIcon(path);
+            MemoryStream stream=null;
+            if (icon != null)
+            {
+                using (var bmp = icon.ToBitmap())
+                {
+                    stream = new MemoryStream();
+                    
+                    bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    image = BitmapFrame.Create(stream);
+                      
+                }
+            }
+            return image;
+        }
+
+        private static ImageSource createIconForFolders(string path)
+        {
+            ImageSource imageSource = null;
+            using (FileStream fs = new FileStream(@"icon\folderIcon.png", FileMode.Open))
+            {
+                var png = new MemoryStream();
+                
+                Image image = Image.FromStream(fs);
+                image.Save(png, System.Drawing.Imaging.ImageFormat.Png);
+                imageSource = BitmapFrame.Create(png);
+            }
+            return imageSource;
         }
     }
 }

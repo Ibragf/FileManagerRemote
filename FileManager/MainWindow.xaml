@@ -46,12 +46,21 @@
         </Grid>
 
         <Grid Grid.Row="1">
-            <ListView Name="phonesList" ItemsSource="{Binding components}"
+            <ListView Name="phonesList" ItemsSource="{Binding Items}"
                       MouseDoubleClick="ListView_MouseDoubleClick"
                       SelectionChanged="phonesList_SelectionChanged">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn DisplayMemberBinding="{Binding name}" Width="300">Имя</GridViewColumn>
+                        <GridViewColumn Width="300" Header="Имя">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="{Binding Image}" MaxHeight="15" MaxWidth="15" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding name}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding lastWriteDate}" Width="150">Дата изменения</GridViewColumn>
                         <GridViewColumn DisplayMemberBinding="{Binding extension}" Width="150">Расширение</GridViewColumn>
                     </GridView>

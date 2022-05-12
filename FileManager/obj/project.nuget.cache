@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "ox54jAkEy6WIJkW/xe9yOEyPvRtsReeNk9kqhfxFuj3pxuDjyNo7LpqrV0y3aU4Gd6Aj/+JWpFVlsAiQ2PU0hw==",
+  "dgSpecHash": "6L+d3TjbuU873DuKEe/tzvAm2U7/QTmpOWT90SN+ymkRGF5ct5bYfCIiGtFL3/9eutxKAjSlTjaDG6DPz9vlew==",
   "success": true,
   "projectFilePath": "D:\\VS2022\\FileManager\\FileManager.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Гаджи\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
+    "C:\\Users\\Гаджи\\.nuget\\packages\\system.drawing.common\\6.0.0\\system.drawing.common.6.0.0.nupkg.sha512"
+  ],
   "logs": []
 }
