@@ -4,15 +4,15 @@
 winexe
 C#
 .cs
-D:\VS2022\FileManager\obj\Debug\net6.0-windows\
+D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\
 FileManager
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-D:\VS2022\FileManager\App.xaml
+D:\GitDesktop\FileManagerRemote\FileManager\App.xaml
 11407045341
 
-71042243417
+8-107272641
 195-1099931856
 MainWindow.xaml;
 

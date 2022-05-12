@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\VS2022\\FileManager\\FileManager.csproj": {}
+    "D:\\GitDesktop\\FileManagerRemote\\FileManager\\FileManager.csproj": {}
   },
   "projects": {
-    "D:\\VS2022\\FileManager\\FileManager.csproj": {
+    "D:\\GitDesktop\\FileManagerRemote\\FileManager\\FileManager.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\VS2022\\FileManager\\FileManager.csproj",
+        "projectUniqueName": "D:\\GitDesktop\\FileManagerRemote\\FileManager\\FileManager.csproj",
         "projectName": "FileManager",
-        "projectPath": "D:\\VS2022\\FileManager\\FileManager.csproj",
+        "projectPath": "D:\\GitDesktop\\FileManagerRemote\\FileManager\\FileManager.csproj",
         "packagesPath": "C:\\Users\\Гаджи\\.nuget\\packages\\",
-        "outputPath": "D:\\VS2022\\FileManager\\obj\\",
+        "outputPath": "D:\\GitDesktop\\FileManagerRemote\\FileManager\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

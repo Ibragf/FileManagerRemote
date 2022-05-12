@@ -4,11 +4,11 @@
 winexe
 C#
 .cs
-D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\
+D:\GitDesktop\FileManagerRemote\FileManager\obj\Release\net6.0-windows\
 FileManager
 none
 false
-TRACE;DEBUG;NET;NET6_0;NETCOREAPP
+TRACE;RELEASE;NET;NET6_0;NETCOREAPP
 D:\GitDesktop\FileManagerRemote\FileManager\App.xaml
 11407045341
 
