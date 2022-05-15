@@ -8,7 +8,8 @@
         xmlns:col="clr-namespace:System.Collections;assembly=mscorlib"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="MainWindow" Height="500" Width="800">
+        Title="MainWindow" Height="500" Width="800"
+        Closing="window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
 
@@ -30,7 +31,7 @@
                 <Button Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" 
                         Width="90"
                         Height="25"
-                        Click="Button_Click">
+                        Click="Back_Click">
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">Back</TextBlock>
                 </Button>
             </Grid>
@@ -65,20 +66,13 @@
                         <GridViewColumn DisplayMemberBinding="{Binding extension}" Width="150">Расширение</GridViewColumn>
                     </GridView>
                 </ListView.View>
-                <!-->
-                <ListView.Resources>
-                    <col:ArrayList x:Key="phones" >
-                        <ListViewItem>
-                            <local:Phone  Title="iPhone 6S" Company="Apple" Price="54990" />
-                        </ListViewItem>
-                        <local:Phone  Title="iPhone 6S" Company="Apple" Price="54990" />
-                        <local:Phone Title="Lumia 950" Company="Microsoft" Price="39990" />
-                        <local:Phone Title="Nexus 5X" Company="Google" Price="29990" />
-                        <local:Phone Title = "Galaxy Edge" Company = "Samsung" Price = "45670" />
-                    </col:ArrayList>
-                </ListView.Resources>
-                </!-->
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="MenuItem" Height="18" Command="Copy"></MenuItem>
+                    </ContextMenu>
+                </ListView.ContextMenu>
             </ListView>
+            
         </Grid>
 
         <Grid Grid.Row="2">

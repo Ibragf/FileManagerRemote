@@ -4,12 +4,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace FileManager.NetworkTCP
 {
-    internal class ServerFileManager
+    internal class ServerFileManager : IDisposable
     {
         private IPAddress ipAddress;
         private int port;
@@ -23,8 +24,12 @@ namespace FileManager.NetworkTCP
             clients = new LinkedList<ClientFileManager>();
         }
 
-        public void Listen()
+        public void Listen(object cancellationToken)
         {
+            if(cancellationToken is CancellationToken cancelToken)
+            {
+                if (cancelToken.IsCancellationRequested) return;
+            }
             try
             {
                 tcpListener = new TcpListener(ipAddress, port);
@@ -37,8 +42,8 @@ namespace FileManager.NetworkTCP
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
-                Disconnect();
+                //MessageBox.Show(ex.Message);
+                Dispose();
             }
         }
 
@@ -67,14 +72,13 @@ namespace FileManager.NetworkTCP
             clients.Remove(clients.Where(x=>x.ID==client.ID).FirstOrDefault());
         }
 
-        private void Disconnect()
+        public void Dispose()
         {
             tcpListener.Stop();
             foreach (ClientFileManager client in clients)
             {
                 client.Close();
             }
-            Environment.Exit(0);
         }
     }
 }

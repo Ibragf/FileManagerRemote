@@ -54,16 +54,44 @@ namespace FileManager.NetworkTCP
             return sb.ToString();
         }
 
-        public void SendCommand(string command)
+        public async Task SendCommandAsync(Commands command, string path)
         {
-            byte[] data = Encoding.UTF8.GetBytes(command);
-            stream.Write(data, 0, data.Length);
+            await Task.Run(() => SendCommand(command, path));
+        }
+        public async Task<string> GetResponseAsync()
+        {
+            var response = await Task.Run(() => GetResponse());
+            return response;
+        }
+        
+        public void SendCommand(Commands command, string path)
+        {
+            try
+            {
+                string commandStr = command.ToString()+";"+path;
+                byte[] data = Encoding.UTF8.GetBytes(commandStr);
+                stream.Write(data, 0, data.Length);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                Dispose();
+            }
         }
 
         public string GetResponse()
         {
-            string response = getStringFromStream(stream);
-            return response;
+            try
+            {
+                string response = getStringFromStream(stream);
+                return response;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                Dispose();
+            }
+            return null;
         }
 
         public void Close()

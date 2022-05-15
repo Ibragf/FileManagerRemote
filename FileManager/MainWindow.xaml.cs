@@ -1,9 +1,10 @@
-﻿using System;
+﻿using FileManager.NetworkTCP;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,26 +15,56 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Newtonsoft.Json;
+using FileManager.Models;
 
 namespace FileManager
 {
     public partial class MainWindow : Window
     {
-        private int SelectedIndex = -1;
+        int port=8005;//изменить
+        string ip= "192.168.0.15";//изменить
+        private ServerFileManager server;
+        private ClientFileManager client;
+        private Dictionary<string, string> computers;
+        Thread serverThread;
+        CancellationTokenSource tokenSource;
         public List<ItemModel> Items { get; set; }
         private Stack<string> LastElements;
+        private DeserializedModels models;
         public MainWindow()
         {
+            tokenSource = new CancellationTokenSource();
+            CancellationToken token= tokenSource.Token;
+            server = new ServerFileManager(System.Net.IPAddress.Parse(ip), port);
+            serverThread = new Thread(new ParameterizedThreadStart(server.Listen));
+            serverThread.Start(token);
+
             Items = new List<ItemModel>();
             LastElements = new Stack<string>();
+
             InitializeComponent();
-            ShowDirs.openDrives(Items);
+
             DataContext = this;
         }
 
-        private void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void showComputers()
         {
-            if (sender.GetType() == typeof(ListView))
+            string[] ID=computers.Keys.ToArray();
+            string[] name=computers.Values.ToArray();
+            Items.Clear();
+            for(int i=0;i<ID.Length;i++)
+            {
+                ItemModel item=new ItemModel(name[i],ID[i],ID);
+                Items.Add(item);
+                phonesList.Items.Refresh();
+            }
+        }
+
+        private async void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            #region oldCode
+            /*if (sender.GetType() == typeof(ListView))
             {
                 try
                 {
@@ -50,26 +81,84 @@ namespace FileManager
                 {
                     phonesList.Items.Refresh();
                 }
+            }*/
+            #endregion
+            if(sender is ListView view)
+            {
+                try
+                {
+                    int index= view.SelectedIndex;
+                    if(index != -1)
+                    {
+                        if(Items[index].Element is string)
+                        {
+                            client=server.GetComputer(Items[index].lastWriteDate);
+                            await client.SendCommandAsync(Commands.Open, "drives");
+                        }
+
+                        string response = await client.GetResponseAsync();
+                        if (response != null)
+                        {
+                            models = JsonConvert.DeserializeObject<DeserializedModels>(response);
+                            Items.Clear();
+                            foreach(var item in models.items)
+                            {
+                                Items.Add(item);
+                            }
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    phonesList.Items.Refresh();
+                }
             }
         }
 
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            computers = server.GetComputers();//временно
+            showComputers();//временно
+            if (LastElements.Count>0)
+            {
+                ShowDirs.openFileOrDir(LastElements.Pop(), Items);
+                phonesList.Items.Refresh();
+                if (LastElements.Count > 0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
+            }
+        }
+
+        private void phonesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
+        }
+
+        private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            server.Dispose();
+            tokenSource.Cancel();
+            tokenSource.Dispose();
+        }
         public void delete(string path)
         {
-            if(!Directory.Exists(path))
+            if (!Directory.Exists(path))
             {
                 return;
             }
-            if (Directory.Exists(path) && Directory.GetFileSystemEntries(path).Length==0)
+            if (Directory.Exists(path) && Directory.GetFileSystemEntries(path).Length == 0)
             {
                 Directory.Delete(path);
                 return;
             }
             DirectoryInfo directory = new DirectoryInfo(path);
             string Pat = directory.ToString();
-            if(directory.Exists)
+            if (directory.Exists)
             {
                 FileInfo[] files = directory.GetFiles();
-                if (files.Length>0)
+                if (files.Length > 0)
                 {
                     foreach (FileInfo file in files)
                     {
@@ -78,7 +167,7 @@ namespace FileManager
                 }
 
                 DirectoryInfo[] dirs = directory.GetDirectories();
-                if(dirs.Length>0)
+                if (dirs.Length > 0)
                 {
                     foreach (var dir in dirs)
                     {
@@ -88,52 +177,5 @@ namespace FileManager
             }
             delete(path);
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if(LastElements.Count>0)
-            {
-                ShowDirs.openFileOrDir(LastElements.Pop(), Items);
-                phonesList.Items.Refresh();
-                if (LastElements.Count > 0) textBox.Text = Directory.GetParent((Items[0].Element.ToString())).ToString();
-            }
-        }
-
-        private void phonesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent((Items[0].Element.ToString())).ToString();
-        }
-    }
-
-    public class ItemModel
-    {
-        public ItemModel(string name, string date, object Element)
-        {
-            this.name = name;
-            lastWriteDate = date;
-            this.Element = Element;
-        }
-
-        public ItemModel(string name, string date, object Element, ImageSource imageSource)
-        {
-            this.Image=imageSource;
-            this.name = name;
-            lastWriteDate = date;
-            this.Element = Element;
-        }
-
-        public ItemModel(string name, string date,string extension, object Element, ImageSource imageSource)
-        {
-            this.name = name;
-            this.extension = extension;
-            this.Element = Element;
-            this.Image = imageSource;
-            lastWriteDate = date;
-        }
-        public string name { get; set; } = String.Empty;
-        public string lastWriteDate { get; set; }=String.Empty;
-        public object Element { get; set; } = null;
-        public string extension { get; set; } = String.Empty;
-        public ImageSource Image { get; set; } = null;
     }
 }
