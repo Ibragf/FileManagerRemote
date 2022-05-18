@@ -14,7 +14,7 @@ namespace FileManager
 {
     internal static class ShowDirs
     {
-        public static void openDrives(List<ItemModel> components)
+        /*public static void openDrives(List<ItemModel> components)
         {
             components.Clear();
             DriveInfo[] drives = DriveInfo.GetDrives();
@@ -143,6 +143,6 @@ namespace FileManager
                 imageSource = BitmapFrame.Create(png);
             }
             return imageSource;
-        }
+        }*/
     }
 }

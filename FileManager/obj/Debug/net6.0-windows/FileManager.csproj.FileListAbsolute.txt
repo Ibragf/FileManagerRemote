@@ -40,3 +40,5 @@ D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\refint\File
 D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\FileManager.pdb
 D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\FileManager.genruntimeconfig.cache
 D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\ref\FileManager.dll
+D:\GitDesktop\FileManagerRemote\FileManager\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\FileManager.csproj.CopyComplete

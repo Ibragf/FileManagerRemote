@@ -1,7 +1,12 @@
-﻿using System;
+﻿using FileManager.Models;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -81,17 +86,16 @@ namespace FileManager.NetworkTCP
 
         public string GetResponse()
         {
+            string response=String.Empty;
             try
             {
-                string response = getStringFromStream(stream);
-                return response;
+                response=getStringFromStream(stream);
             }
-            catch(Exception ex)
+            catch (Exception ex)    
             {
-                MessageBox.Show(ex.Message);
-                Dispose();
+                MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
             }
-            return null;
+            return response;
         }
 
         public void Close()
@@ -105,5 +109,6 @@ namespace FileManager.NetworkTCP
             server.RemoveConnection(this);
             Close();
         }
+
     }
 }

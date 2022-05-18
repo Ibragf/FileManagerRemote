@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
 using FileManager.Models;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace FileManager
 {
@@ -29,9 +30,9 @@ namespace FileManager
         private Dictionary<string, string> computers;
         Thread serverThread;
         CancellationTokenSource tokenSource;
-        public List<ItemModel> Items { get; set; }
+        public List<Model> Items { get; set; }
+        private SerializableClass serializableClass;
         private Stack<string> LastElements;
-        private DeserializedModels models;
         public MainWindow()
         {
             tokenSource = new CancellationTokenSource();
@@ -40,7 +41,7 @@ namespace FileManager
             serverThread = new Thread(new ParameterizedThreadStart(server.Listen));
             serverThread.Start(token);
 
-            Items = new List<ItemModel>();
+            Items = new List<Model>();
             LastElements = new Stack<string>();
 
             InitializeComponent();
@@ -55,8 +56,8 @@ namespace FileManager
             Items.Clear();
             for(int i=0;i<ID.Length;i++)
             {
-                ItemModel item=new ItemModel(name[i],ID[i],ID);
-                Items.Add(item);
+                CompModel comp = new CompModel(name[i], "comp",ID[i]);
+                Items.Add(comp);
                 phonesList.Items.Refresh();
             }
         }
@@ -90,18 +91,18 @@ namespace FileManager
                     int index= view.SelectedIndex;
                     if(index != -1)
                     {
-                        if(Items[index].Element is string)
+                        if(Items[index] is CompModel comp)
                         {
-                            client=server.GetComputer(Items[index].lastWriteDate);
+                            client=server.GetComputer(comp.ID);
                             await client.SendCommandAsync(Commands.Open, "drives");
                         }
 
                         string response = await client.GetResponseAsync();
-                        if (response != null)
+                        if(!string.IsNullOrEmpty(response))
                         {
-                            models = JsonConvert.DeserializeObject<DeserializedModels>(response);
+                            serializableClass=JsonConvert.DeserializeObject<SerializableClass>(response);
                             Items.Clear();
-                            foreach(var item in models.items)
+                            foreach(var item in serializableClass.Drivers)
                             {
                                 Items.Add(item);
                             }
@@ -110,7 +111,7 @@ namespace FileManager
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
                 }
                 finally
                 {
@@ -123,24 +124,24 @@ namespace FileManager
         {
             computers = server.GetComputers();//временно
             showComputers();//временно
-            if (LastElements.Count>0)
+            /*if (LastElements.Count>0)
             {
                 ShowDirs.openFileOrDir(LastElements.Pop(), Items);
                 phonesList.Items.Refresh();
                 if (LastElements.Count > 0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
-            }
+            }*/
         }
 
         private void phonesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
+            //if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
         }
 
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            server.Dispose();
             tokenSource.Cancel();
             tokenSource.Dispose();
+            server.Dispose();
         }
         public void delete(string path)
         {
@@ -176,6 +177,21 @@ namespace FileManager
                 }
             }
             delete(path);
+        }
+
+        private ImageSource createIcon()
+        {
+            ImageSource imageSource = null;
+            using (FileStream fs = new FileStream(@$"icon\compIcon.png", FileMode.Open))
+            {
+                var png = new MemoryStream();
+
+                System.Drawing.Image image = System.Drawing.Image.FromStream(fs);
+                image.Save(png, System.Drawing.Imaging.ImageFormat.Png);
+                imageSource = BitmapFrame.Create(png);
+            }
+            
+            return imageSource;
         }
     }
 }
