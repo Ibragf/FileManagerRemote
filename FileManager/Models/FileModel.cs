@@ -6,7 +6,7 @@ using System.Windows.Media.Imaging;
 
 namespace FileManager.Models
 {
-    internal class FileModel
+    internal class FileModel : Model
     {
         public string LastWriteDate { get; set; }
         public string Extension { get; set; }
@@ -18,7 +18,7 @@ namespace FileManager.Models
         private byte[] fileData;
         private byte[] imageData;
 
-        public FileModel(string name, string type, string date, string extension, byte[] file, byte[] image)
+        public FileModel(string name, string type, string date, string extension, byte[] file, byte[] image) : base(name, type)
         {
             this.LastWriteDate = date;
             this.Extension = extension;
