@@ -10,13 +10,11 @@ namespace FileManager.Models
     {
         public string LastWriteDate { get; set; }
         public string Extension { get; set; }
-        public ImageSource ImageSource
-        {
-            get { return toImageSource(); }
-            set { }
-        }
-        private byte[] fileData;
-        private byte[] imageData;
+        public string Path { get; set; }
+        public ImageSource ImageSource { get; private set; }
+        
+        public byte[] fileData { get; set; }
+        public byte[] imageData { get; set; }
 
         public FileModel(string name, string type, string date, string extension, byte[] file, byte[] image) : base(name, type)
         {
@@ -26,12 +24,55 @@ namespace FileManager.Models
             this.imageData = image;
         }
 
-        private ImageSource toImageSource()
+        public void createImageSource(int number)
         {
+            /*
             ImageSource imageSource = null;
             MemoryStream memoryStream = new MemoryStream(imageData);
             imageSource = BitmapFrame.Create(memoryStream);
             return imageSource;
+            */
+            ImageSource image = null;
+            string path = @"D:\FILES\new"+number+Extension;
+
+            File.Create(path);
+            if(File.Exists(path))
+            {
+                Icon icon = Icon.ExtractAssociatedIcon(path);
+                MemoryStream stream = null;
+                if (icon != null)
+                {
+                    using (var bmp = icon.ToBitmap())
+                    {
+                        stream = new MemoryStream();
+
+                        bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                        image = BitmapFrame.Create(stream);
+
+                    }
+                }
+                //File.Delete(path);
+            }
+            ImageSource = image;
         }
+
+        /*
+         * ImageSource image = null;
+            Icon icon = Icon.ExtractAssociatedIcon(path);
+            MemoryStream stream=null;
+            if (icon != null)
+            {
+                using (var bmp = icon.ToBitmap())
+                {
+                    stream = new MemoryStream();
+                    
+                    bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    image = BitmapFrame.Create(stream);
+                      
+                }
+            }
+            return image;
+         * 
+         * */
     }
 }

@@ -8,5 +8,6 @@ namespace FileManager.Models
 {
     public class DriveModel : Model
     {
+        public string path { get; set; }
     }
 }

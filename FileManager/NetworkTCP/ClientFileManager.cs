@@ -19,7 +19,14 @@ namespace FileManager.NetworkTCP
         private TcpClient tcpClient;
         private ServerFileManager server;
         private NetworkStream stream;
+
         public string compName { get; private set; } = string.Empty;
+        public bool IsConnected {
+            get
+            {
+                return tcpClient.Connected;
+            }
+        }
 
         public ClientFileManager(TcpClient tcpClient, ServerFileManager server)
         {
@@ -59,9 +66,11 @@ namespace FileManager.NetworkTCP
             return sb.ToString();
         }
 
-        public async Task SendCommandAsync(Commands command, string path)
+        public async Task<int> SendCommandAsync(Commands command, string path, string type)
         {
-            await Task.Run(() => SendCommand(command, path));
+            Task<int> task =Task.Run(() => SendCommand(command, path, type));
+            if (task.Result!=-1111) throw new SocketException(task.Result);
+            return task.Result;
         }
         public async Task<string> GetResponseAsync()
         {
@@ -69,31 +78,35 @@ namespace FileManager.NetworkTCP
             return response;
         }
         
-        public void SendCommand(Commands command, string path)
+        private int SendCommand(Commands command, string path, string type)
         {
+            int errorCode = -1111;
             try
             {
-                string commandStr = command.ToString()+";"+path;
+                string commandStr = command.ToString() + ";" + path + ";" + type;
                 byte[] data = Encoding.UTF8.GetBytes(commandStr);
                 stream.Write(data, 0, data.Length);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
-                Dispose();
+                if(ex.InnerException is SocketException exSocket)
+                {
+                    errorCode = (int)exSocket.SocketErrorCode;
+                }
             }
+            return errorCode;
         }
 
-        public string GetResponse()
+        private string GetResponse()
         {
-            string response=String.Empty;
+            string response = String.Empty;
             try
             {
-                response=getStringFromStream(stream);
+                response = getStringFromStream(stream);
             }
-            catch (Exception ex)    
+            catch(Exception ex)
             {
-                MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
+
             }
             return response;
         }

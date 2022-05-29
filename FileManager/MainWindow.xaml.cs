@@ -18,13 +18,14 @@ using System.Windows.Shapes;
 using Newtonsoft.Json;
 using FileManager.Models;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Net.Sockets;
 
 namespace FileManager
 {
     public partial class MainWindow : Window
     {
         int port=8005;//изменить
-        string ip= "192.168.0.15";//изменить
+        string ip= "192.168.0.16";//изменить
         private ServerFileManager server;
         private ClientFileManager client;
         private Dictionary<string, string> computers;
@@ -51,12 +52,13 @@ namespace FileManager
 
         private void showComputers()
         {
+            computers = server.GetComputers();
             string[] ID=computers.Keys.ToArray();
             string[] name=computers.Values.ToArray();
             Items.Clear();
             for(int i=0;i<ID.Length;i++)
             {
-                CompModel comp = new CompModel(name[i], "comp",ID[i]);
+                CompModel comp = new CompModel(name[i], "comp", ID[i]);
                 Items.Add(comp);
                 phonesList.Items.Refresh();
             }
@@ -91,27 +93,74 @@ namespace FileManager
                     int index= view.SelectedIndex;
                     if(index != -1)
                     {
+                        string response=String.Empty;
+
                         if(Items[index] is CompModel comp)
                         {
                             client=server.GetComputer(comp.ID);
-                            await client.SendCommandAsync(Commands.Open, "drives");
+                            await client.SendCommandAsync(Commands.Open, "", "drives");
+ 
+                            response = await client.GetResponseAsync();
                         }
 
-                        string response = await client.GetResponseAsync();
+                        if(Items[index] is DriveModel drive)
+                        {
+                            await client.SendCommandAsync(Commands.Open, drive.path, drive.Type);
+                            response = await client.GetResponseAsync();
+                        }
+
+                        if(Items[index] is DirectoryModel directory)
+                        {
+                            await client.SendCommandAsync(Commands.Open, directory.path, directory.Type);
+                            response=await client.GetResponseAsync();
+                        }
+                       
+
                         if(!string.IsNullOrEmpty(response))
                         {
-                            serializableClass=JsonConvert.DeserializeObject<SerializableClass>(response);
+                            Thread.Sleep(10);
+                            serializableClass = JsonConvert.DeserializeObject<SerializableClass>(response);
                             Items.Clear();
-                            foreach(var item in serializableClass.Drivers)
+                            if(serializableClass.Drivers!=null)
                             {
-                                Items.Add(item);
+                                foreach (var item in serializableClass.Drivers)
+                                {
+                                    Items.Add(item);
+                                }
+                            }
+                            if(serializableClass.Folders != null)
+                            {
+                                foreach (var item in serializableClass.Folders)
+                                {
+                                    Items.Add(item);
+                                }
+                            }
+                            if(serializableClass.Files!= null)
+                            {
+                                int i = 0;
+                                foreach (var item in serializableClass.Files)
+                                {
+                                    Items.Add(item);
+                                    item.createImageSource(i);
+                                    i++;
+                                }
                             }
                         }
                     }
                 }
-                catch(Exception ex)
+                catch(SocketException ex)
                 {
-                    MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
+                    client.Dispose();
+                    showComputers();
+                    MessageBox.Show((int)ex.SocketErrorCode+":"+ex.SocketErrorCode.ToString());
+                    //MessageBox.Show(ex.ErrorCode.ToString());
+                    //MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
+                }
+                catch (Exception ex)
+                {
+                    client.Dispose();
+                    showComputers();
+                    MessageBox.Show("ошибка");
                 }
                 finally
                 {
@@ -122,7 +171,6 @@ namespace FileManager
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            computers = server.GetComputers();//временно
             showComputers();//временно
             /*if (LastElements.Count>0)
             {
@@ -142,6 +190,12 @@ namespace FileManager
             tokenSource.Cancel();
             tokenSource.Dispose();
             server.Dispose();
+
+            string[] files=Directory.GetFiles(@"D:\FILES");
+            foreach (string file in files)
+            {
+                File.Delete(file);
+            }
         }
         public void delete(string path)
         {

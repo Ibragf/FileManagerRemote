@@ -26,23 +26,22 @@ namespace FileManager.NetworkTCP
 
         public void Listen(object cancellationToken)
         {
-            if(cancellationToken is CancellationToken cancelToken)
-            {
-                if (cancelToken.IsCancellationRequested) return;
-            }
+            CancellationToken cancelToken =(CancellationToken) cancellationToken;
             try
             {
                 tcpListener = new TcpListener(ipAddress, port);
                 tcpListener.Start();
                 while(true)
                 {
+                    if (cancelToken.IsCancellationRequested) return;
                     TcpClient TcpClient = tcpListener.AcceptTcpClient();
                     ClientFileManager client = new ClientFileManager(TcpClient, this);
                 }
             }
-            catch (Exception ex)
+            catch (SocketException ex)
             {
-                MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
+                if(ex.SocketErrorCode!=SocketError.Interrupted)
+                    MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
                 Dispose();
             }
         }

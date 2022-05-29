@@ -56,8 +56,8 @@
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="{Binding ImageSource}" MaxHeight="15" MaxWidth="15" Margin="0,0,5,0"/>
-                                        <TextBlock Text="{Binding Name}"/>
+                                        <Image Source="{Binding ImageSource}" MaxHeight="17" MaxWidth="17" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding Name}" FontSize="14"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
