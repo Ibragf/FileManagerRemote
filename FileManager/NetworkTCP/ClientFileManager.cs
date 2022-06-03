@@ -1,12 +1,6 @@
-﻿using FileManager.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Sockets;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -52,6 +46,35 @@ namespace FileManager.NetworkTCP
             return networkStream;
         }
 
+        public async Task<byte[]> DownloadFileAsync()
+        {
+            Task<byte[]> data = Task.Run(()=>DownloadFile());
+
+            return data.Result;
+        }
+
+        public byte[] DownloadFile()
+        {
+            byte[] buffer=new byte[256];
+            getStringFromStream(stream);
+
+            string fileLength= getStringFromStream(stream);
+            int lenght=Int32.Parse(fileLength);
+            Encoding.UTF8.GetBytes(fileLength).CopyTo(buffer, 0);
+            stream.Write(buffer, 0, buffer.Length);
+
+            byte[] data=new byte[lenght];
+            int index = 0;
+            do
+            {
+                int bytes=stream.Read(buffer, 0, buffer.Length);
+                buffer.CopyTo(data, index);
+                index += bytes;
+            } while (stream.DataAvailable);
+
+            return data;
+        }
+
         private string getStringFromStream(NetworkStream networkStream)
         {
             StringBuilder sb = new StringBuilder();
@@ -66,7 +89,7 @@ namespace FileManager.NetworkTCP
             return sb.ToString();
         }
 
-        public async Task<int> SendCommandAsync(Commands command, string path, string type)
+        public async Task<int> SendCommandAsync(Command command, string path, string type)
         {
             Task<int> task =Task.Run(() => SendCommand(command, path, type));
             if (task.Result!=-1111) throw new SocketException(task.Result);
@@ -78,7 +101,7 @@ namespace FileManager.NetworkTCP
             return response;
         }
         
-        private int SendCommand(Commands command, string path, string type)
+        private int SendCommand(Command command, string path, string type)
         {
             int errorCode = -1111;
             try
@@ -97,7 +120,7 @@ namespace FileManager.NetworkTCP
             return errorCode;
         }
 
-        private string GetResponse()
+        public string GetResponse()
         {
             string response = String.Empty;
             try

@@ -21,35 +21,25 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
-                <ColumnDefinition Width="600"/>
-                <ColumnDefinition Width="90"/>
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0">
+            <StackPanel Orientation="Horizontal">
                 <Button Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" 
                         Width="90"
                         Height="25"
                         Click="Back_Click">
                     <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center">Back</TextBlock>
                 </Button>
-            </Grid>
-            <Grid Grid.Column="1">
                 <TextBox x:Name="textBox" IsReadOnly="True" Width="590" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,5,0" >text</TextBox>
-            </Grid>
+                <Button Height="25" Width="80" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center">
 
-            <Grid Grid.Column="2" >
-                <Button Height="25" Width="80" Margin="0,0,5,0" HorizontalAlignment="Center" VerticalAlignment="Center">
-    
                 </Button>
-            </Grid>
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
-            <ListView Name="phonesList" ItemsSource="{Binding Items}"
+            <ListView Name="listview" ItemsSource="{Binding Items}"
                       MouseDoubleClick="ListView_MouseDoubleClick"
-                      SelectionChanged="phonesList_SelectionChanged">
+                      SelectionChanged="Items_SelectionChanged"
+                      MouseDown="listview_MouseDown">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="300" Header="Имя">
@@ -68,8 +58,11 @@
                 </ListView.View>
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="MenuItem" Height="18" Command="Copy"></MenuItem>
+                        <MenuItem Header="Download" Command="{Binding downloadCommand}" CommandParameter="{Binding SelectedItem}">
+                            
+                        </MenuItem>
                     </ContextMenu>
+                        
                 </ListView.ContextMenu>
             </ListView>
             

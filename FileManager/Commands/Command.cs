@@ -1,7 +1,8 @@
 ﻿using System;
 
-enum Commands
+enum Command
 { 
     Open,
+    Download,
     Back
 }

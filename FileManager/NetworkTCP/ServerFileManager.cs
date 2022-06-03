@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace FileManager.NetworkTCP
@@ -24,16 +22,14 @@ namespace FileManager.NetworkTCP
             clients = new LinkedList<ClientFileManager>();
         }
 
-        public void Listen(object cancellationToken)
+        public void Listen()
         {
-            CancellationToken cancelToken =(CancellationToken) cancellationToken;
             try
             {
                 tcpListener = new TcpListener(ipAddress, port);
                 tcpListener.Start();
                 while(true)
                 {
-                    if (cancelToken.IsCancellationRequested) return;
                     TcpClient TcpClient = tcpListener.AcceptTcpClient();
                     ClientFileManager client = new ClientFileManager(TcpClient, this);
                 }

@@ -3,22 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
 using FileManager.Models;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Net.Sockets;
+using FileManager.ViewModel;
+using System.Diagnostics;
 
 namespace FileManager
 {
@@ -34,23 +29,24 @@ namespace FileManager
         public List<Model> Items { get; set; }
         private SerializableClass serializableClass;
         private Stack<string> LastElements;
+        private FileViewModel viewModel = new FileViewModel();
         public MainWindow()
         {
             tokenSource = new CancellationTokenSource();
             CancellationToken token= tokenSource.Token;
-            server = new ServerFileManager(System.Net.IPAddress.Parse(ip), port);
-            serverThread = new Thread(new ParameterizedThreadStart(server.Listen));
-            serverThread.Start(token);
+            /*server = new ServerFileManager(System.Net.IPAddress.Parse(ip), port);
+            serverThread = new Thread(new ThreadStart(server.Listen));
+            serverThread.Start(token);*/
 
             Items = new List<Model>();
             LastElements = new Stack<string>();
 
             InitializeComponent();
 
-            DataContext = this;
+            DataContext = viewModel;
         }
 
-        private void showComputers()
+        /*private void showComputers()
         {
             computers = server.GetComputers();
             string[] ID=computers.Keys.ToArray();
@@ -62,7 +58,7 @@ namespace FileManager
                 Items.Add(comp);
                 phonesList.Items.Refresh();
             }
-        }
+        }*/
 
         private async void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -88,9 +84,12 @@ namespace FileManager
             #endregion
             if(sender is ListView view)
             {
+                #region oldcode
+                /*
                 try
                 {
                     int index= view.SelectedIndex;
+                    var objec=view.SelectedItem;
                     if(index != -1)
                     {
                         string response=String.Empty;
@@ -98,20 +97,20 @@ namespace FileManager
                         if(Items[index] is CompModel comp)
                         {
                             client=server.GetComputer(comp.ID);
-                            await client.SendCommandAsync(Commands.Open, "", "drives");
+                            await client.SendCommandAsync(Command.Open, "", "drives");
  
                             response = await client.GetResponseAsync();
                         }
 
                         if(Items[index] is DriveModel drive)
                         {
-                            await client.SendCommandAsync(Commands.Open, drive.path, drive.Type);
+                            await client.SendCommandAsync(Command.Open, drive.Path, drive.Type);
                             response = await client.GetResponseAsync();
                         }
 
                         if(Items[index] is DirectoryModel directory)
                         {
-                            await client.SendCommandAsync(Commands.Open, directory.path, directory.Type);
+                            await client.SendCommandAsync(Command.Open, directory.Path, directory.Type);
                             response=await client.GetResponseAsync();
                         }
                        
@@ -166,12 +165,19 @@ namespace FileManager
                 {
                     phonesList.Items.Refresh();
                 }
+                */
+                #endregion end
+                object model=view.SelectedItem;
+                if(model != null)
+                {
+                    viewModel.OpenItemAsync(model);
+                }
             }
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            showComputers();//временно
+            viewModel.ShowComputers();//временно
             /*if (LastElements.Count>0)
             {
                 ShowDirs.openFileOrDir(LastElements.Pop(), Items);
@@ -180,16 +186,22 @@ namespace FileManager
             }*/
         }
 
-        private void phonesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Items_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //if(LastElements.Count>0 && Items.Count>0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
+            if(sender is ListView view)
+            {
+                if (view.SelectedItem == null)
+                {
+                    viewModel.SelectedItem = null;
+                    return;
+                }
+                viewModel.SelectedItem = (Model) view.SelectedItem;
+            }
         }
 
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            tokenSource.Cancel();
-            tokenSource.Dispose();
-            server.Dispose();
+            viewModel.Dispose();
 
             string[] files=Directory.GetFiles(@"D:\FILES");
             foreach (string file in files)
@@ -197,55 +209,16 @@ namespace FileManager
                 File.Delete(file);
             }
         }
-        public void delete(string path)
+        private void listview_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!Directory.Exists(path))
+            if(sender is ListView view)
             {
-                return;
-            }
-            if (Directory.Exists(path) && Directory.GetFileSystemEntries(path).Length == 0)
-            {
-                Directory.Delete(path);
-                return;
-            }
-            DirectoryInfo directory = new DirectoryInfo(path);
-            string Pat = directory.ToString();
-            if (directory.Exists)
-            {
-                FileInfo[] files = directory.GetFiles();
-                if (files.Length > 0)
+                if(viewModel.SelectedItem?.Name==((Model)view.SelectedItem)?.Name)
                 {
-                    foreach (FileInfo file in files)
-                    {
-                        file.Delete();
-                    }
-                }
-
-                DirectoryInfo[] dirs = directory.GetDirectories();
-                if (dirs.Length > 0)
-                {
-                    foreach (var dir in dirs)
-                    {
-                        delete(dir.ToString());
-                    }
+                    view.SelectedItem = null;
+                    viewModel.SelectedItem = null;
                 }
             }
-            delete(path);
-        }
-
-        private ImageSource createIcon()
-        {
-            ImageSource imageSource = null;
-            using (FileStream fs = new FileStream(@$"icon\compIcon.png", FileMode.Open))
-            {
-                var png = new MemoryStream();
-
-                System.Drawing.Image image = System.Drawing.Image.FromStream(fs);
-                image.Save(png, System.Drawing.Imaging.ImageFormat.Png);
-                imageSource = BitmapFrame.Create(png);
-            }
-            
-            return imageSource;
         }
     }
 }

@@ -10,6 +10,7 @@ namespace FileManager.Models
     {
         public string Name { get; set; } = String.Empty;
         public string Type { get; set; } = null;
+        public string Path { get; set; }
         public virtual ImageSource ImageSource { get { return createIcon(); } set { } }
         public Model()
         {

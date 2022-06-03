@@ -42,3 +42,4 @@ D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\FileManager
 D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\ref\FileManager.dll
 D:\GitDesktop\FileManagerRemote\FileManager\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
 D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\FileManager.csproj.CopyComplete
+D:\GitDesktop\FileManagerRemote\FileManager\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs

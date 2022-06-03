@@ -10,19 +10,10 @@ namespace FileManager.Models
     {
         public string LastWriteDate { get; set; }
         public string Extension { get; set; }
-        public string Path { get; set; }
         public ImageSource ImageSource { get; private set; }
         
         public byte[] fileData { get; set; }
         public byte[] imageData { get; set; }
-
-        public FileModel(string name, string type, string date, string extension, byte[] file, byte[] image) : base(name, type)
-        {
-            this.LastWriteDate = date;
-            this.Extension = extension;
-            this.fileData = file;
-            this.imageData = image;
-        }
 
         public void createImageSource(int number)
         {
