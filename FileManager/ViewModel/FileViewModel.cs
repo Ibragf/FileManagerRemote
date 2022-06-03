@@ -51,7 +51,7 @@ namespace FileManager.ViewModel
                 {
                     _isTaskCompleted = false;
                     //DeserializeResponse(SendCommand(Command.Download, model).Result);
-                    string result = await SendCommandAsync(Command.Download, SelectedItem);
+                    await client.SendCommandAsync(Command.Download, SelectedItem.Path, SelectedItem.Type);
                     byte[] data = client.DownloadFile();
                     Task task = Task.Factory.StartNew(() =>
                     {
@@ -62,7 +62,7 @@ namespace FileManager.ViewModel
                             sb.Append(SelectedItem.Name[i]);
                         }
 
-                        using (FileStream fs = new FileStream(@$"C:\Users\{Environment.UserName}\Downloads\{sb.ToString()}.zip", FileMode.Create))
+                        using (FileStream fs = new FileStream(@$"C:\Users\{Environment.UserName}\Downloads\{SelectedItem.Name}.zip", FileMode.Create))
                         {
                             fs.Write(data, 0, data.Length);
                         }
@@ -81,7 +81,7 @@ namespace FileManager.ViewModel
             catch (Exception ex)
             {
                 client.Dispose();
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.Message+"\n"+ex.StackTrace);
             }
         }
 

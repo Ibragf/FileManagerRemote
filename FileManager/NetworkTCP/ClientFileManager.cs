@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,20 +57,30 @@ namespace FileManager.NetworkTCP
         public byte[] DownloadFile()
         {
             byte[] buffer=new byte[256];
-            getStringFromStream(stream);
 
-            string fileLength= getStringFromStream(stream);
+            StringBuilder sb=new StringBuilder();
+            do
+            {
+                int bytes=stream.Read(buffer, 0, buffer.Length);
+                sb.Append(Encoding.UTF8.GetString(buffer, 0, bytes));
+            }while(stream.DataAvailable);
+
+            string fileLength=sb.ToString();
             int lenght=Int32.Parse(fileLength);
             Encoding.UTF8.GetBytes(fileLength).CopyTo(buffer, 0);
             stream.Write(buffer, 0, buffer.Length);
 
             byte[] data=new byte[lenght];
             int index = 0;
+            int size = 0;
             do
             {
-                int bytes=stream.Read(buffer, 0, buffer.Length);
+                /*int bytes=stream.Read(buffer, 0, buffer.Length);
+                size += buffer.Length;
+                if (size > data.Length) Trace.WriteLine("not long enough");
                 buffer.CopyTo(data, index);
-                index += bytes;
+                index += bytes;*/
+                stream.Read(data, 0, data.Length);
             } while (stream.DataAvailable);
 
             return data;
