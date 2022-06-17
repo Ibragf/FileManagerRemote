@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -31,7 +32,8 @@ namespace FileManager.Commands
 
         public void Execute(object? parameter)
         {
-            execute.Invoke(parameter);
+            Thread thread = new Thread(new ParameterizedThreadStart(execute));
+            thread.Start(parameter);
         }
     }
 }

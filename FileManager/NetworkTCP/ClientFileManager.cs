@@ -1,5 +1,7 @@
-﻿using System;
+﻿using FileManager.ViewModel;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
@@ -47,43 +49,47 @@ namespace FileManager.NetworkTCP
             return networkStream;
         }
 
-        public async Task<byte[]> DownloadFileAsync()
+        public void DownloadFile(object sender, DoWorkEventArgs e)
         {
-            Task<byte[]> data = Task.Run(()=>DownloadFile());
-
-            return data.Result;
-        }
-
-        public byte[] DownloadFile()
-        {
-            byte[] buffer=new byte[256];
-
-            StringBuilder sb=new StringBuilder();
-            do
+            byte[] data;
+            lock(stream)
             {
-                int bytes=stream.Read(buffer, 0, buffer.Length);
-                sb.Append(Encoding.UTF8.GetString(buffer, 0, bytes));
-            }while(stream.DataAvailable);
+                byte[] buffer = new byte[512];
 
-            string fileLength=sb.ToString();
-            int lenght=Int32.Parse(fileLength);
-            Encoding.UTF8.GetBytes(fileLength).CopyTo(buffer, 0);
-            stream.Write(buffer, 0, buffer.Length);
+                StringBuilder sb = new StringBuilder();
+                do
+                {
+                    int bytes = stream.Read(buffer, 0, buffer.Length);
+                    sb.Append(Encoding.UTF8.GetString(buffer, 0, bytes));
+                } while (stream.DataAvailable);
 
-            byte[] data=new byte[lenght];
-            int index = 0;
-            int size = 0;
-            do
-            {
-                /*int bytes=stream.Read(buffer, 0, buffer.Length);
-                size += buffer.Length;
-                if (size > data.Length) Trace.WriteLine("not long enough");
-                buffer.CopyTo(data, index);
-                index += bytes;*/
-                stream.Read(data, 0, data.Length);
-            } while (stream.DataAvailable);
+                string fileLength = sb.ToString();
+                double lenght = Double.Parse(fileLength);
+                Encoding.UTF8.GetBytes(fileLength).CopyTo(buffer, 0);
+                stream.Write(buffer, 0, buffer.Length);
 
-            return data;
+                data = new byte[(int)lenght];
+                int index = 0;
+                do
+                {
+                    double bytes = stream.Read(buffer, 0, buffer.Length);
+                    double percentProgress = (bytes / lenght)*100;
+                    (sender as BackgroundWorker).ReportProgress((int)percentProgress, percentProgress);
+                    if (bytes<buffer.Length)
+                    {
+                        byte[] newBuffer=new byte[(int)bytes];
+                        for(int i=0; i<newBuffer.Length; i++)
+                        {
+                            newBuffer[i]=buffer[i];
+                        }
+                        newBuffer.CopyTo(data, index);
+                        break;
+                    }
+                    buffer.CopyTo(data, index);
+                    index +=(int)bytes;
+                } while (stream.DataAvailable);
+            }
+            e.Result= data;
         }
 
         private string getStringFromStream(NetworkStream networkStream)
@@ -102,9 +108,9 @@ namespace FileManager.NetworkTCP
 
         public async Task<int> SendCommandAsync(Command command, string path, string type)
         {
-            Task<int> task =Task.Run(() => SendCommand(command, path, type));
-            if (task.Result!=-1111) throw new SocketException(task.Result);
-            return task.Result;
+            var task =await Task.Run(() => SendCommand(command, path, type));
+            if (task!=-1111) throw new SocketException(task);
+            return task;
         }
         public async Task<string> GetResponseAsync()
         {

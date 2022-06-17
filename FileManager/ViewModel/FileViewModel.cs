@@ -23,7 +23,7 @@ namespace FileManager.ViewModel
         public ObservableCollection<Model> Items { get; private set; }
         public DownloadCommand downloadCommand { get; private set; }
         public Model? SelectedItem { get; set; }
-        private bool _isTaskCompleted=true;
+        public ProgressBarBackground progressBar { get; private set; }
 
         private Dictionary<string, string> computers;
         private SerializableClass serializableClass;
@@ -31,15 +31,15 @@ namespace FileManager.ViewModel
         private ServerFileManager server;
 
 
-        public FileViewModel()
+        public FileViewModel(MainWindow mainWindow)
         {
             Items = new ObservableCollection<Model>();
             downloadCommand = new DownloadCommand(DownloadFileAsync,CanExecuteDownload);
+            progressBar = new ProgressBarBackground();
 
             server = new ServerFileManager(System.Net.IPAddress.Parse("192.168.0.16"), 8005);
             Thread serverThread=new Thread(server.Listen);
             serverThread.Start();
-            
             ShowComputers();
         }
 
@@ -47,35 +47,40 @@ namespace FileManager.ViewModel
         {
             try
             {
-                if(SelectedItem is FileModel|| SelectedItem is DirectoryModel)
+                if(SelectedItem is DirectoryModel || SelectedItem is FileModel)
                 {
-                    _isTaskCompleted = false;
-                    //DeserializeResponse(SendCommand(Command.Download, model).Result);
                     await client.SendCommandAsync(Command.Download, SelectedItem.Path, SelectedItem.Type);
-                    byte[] data = client.DownloadFile();
-                    Task task = Task.Factory.StartNew(() =>
+                    progressBar.selectedItem = SelectedItem;
+                    progressBar.worker_DoWork = client.DownloadFile;
+                    progressBar.Start();
+
+                    /*string filename;
+                    if(SelectedItem is FileModel)
                     {
-                        int var = SelectedItem.Name.LastIndexOf('.');
+                        int index = SelectedItem.Name.LastIndexOf('.');
                         StringBuilder sb = new StringBuilder();
-                        for (int i = 0; i < var; i++)
+                        for(int i = 0; i < index; i++)
                         {
                             sb.Append(SelectedItem.Name[i]);
                         }
+                        filename = sb.ToString();
+                    }
+                    else filename=SelectedItem.Name;
 
-                        using (FileStream fs = new FileStream(@$"C:\Users\{Environment.UserName}\Downloads\{SelectedItem.Name}.zip", FileMode.Create))
+                    Task task = Task.Factory.StartNew(() =>
+                    {
+                        using (FileStream fs = new FileStream(@$"C:\Users\{Environment.UserName}\Downloads\{filename}.zip", FileMode.OpenOrCreate))
                         {
                             fs.Write(data, 0, data.Length);
                         }
                     });
-                    task.Wait();
-
-                    _isTaskCompleted = task.IsCompleted;
-
+                    task.Wait();*/
                 }
             }
             catch (SocketException ex)
             {
                 client.Dispose();
+                ShowComputers();
                 MessageBox.Show((int)ex.SocketErrorCode + ":" + ex.SocketErrorCode.ToString());
             }
             catch (Exception ex)
@@ -123,7 +128,7 @@ namespace FileManager.ViewModel
                 client = server.GetComputer(comp.ID);
                 await client.SendCommandAsync(Command.Open, "", "comp");
 
-                response =await client.GetResponseAsync();
+                response = await client.GetResponseAsync();
                 return response;
             }
 

@@ -17,12 +17,6 @@ namespace FileManager.Models
 
         public void createImageSource(int number)
         {
-            /*
-            ImageSource imageSource = null;
-            MemoryStream memoryStream = new MemoryStream(imageData);
-            imageSource = BitmapFrame.Create(memoryStream);
-            return imageSource;
-            */
             ImageSource image = null;
             string path = @"D:\FILES\new"+number+Extension;
 
@@ -42,28 +36,8 @@ namespace FileManager.Models
 
                     }
                 }
-                //File.Delete(path);
             }
             ImageSource = image;
         }
-
-        /*
-         * ImageSource image = null;
-            Icon icon = Icon.ExtractAssociatedIcon(path);
-            MemoryStream stream=null;
-            if (icon != null)
-            {
-                using (var bmp = icon.ToBitmap())
-                {
-                    stream = new MemoryStream();
-                    
-                    bmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                    image = BitmapFrame.Create(stream);
-                      
-                }
-            }
-            return image;
-         * 
-         * */
     }
 }

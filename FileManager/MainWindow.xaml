@@ -75,9 +75,10 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5,0,0,0">
-                    <TextBlock VerticalAlignment="Center">FileName</TextBlock>
-                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">--</TextBlock>
+                <StackPanel Margin="5,0,0,0" Orientation="Horizontal">
+                    <TextBlock Visibility="{Binding Path=progressBar.ProgressVisibility}">Скачивание</TextBlock>
+                    <ProgressBar x:Name="progressBar" Margin="5,0,0,0" Value="{Binding Path=progressBar.ProgressValue}" Visibility="{Binding Path=progressBar.ProgressVisibility}"
+                                 Minimum="0" Maximum="100" Width="80" VerticalAlignment="Center" Height="5"></ProgressBar>
                 </StackPanel>
             </Grid>
             <Grid Grid.Column="1">

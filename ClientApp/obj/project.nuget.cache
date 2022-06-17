@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "y7A6T5JFfPksPHih/dMFQC4FtpTOn6klxN+0p+GJNaOiuLNpebWj6cIMh+DxeW4wNZ24Mm4USYIY1UBt6BaJow==",
+  "success": true,
+  "projectFilePath": "D:\\VS2022\\ClientApp\\ClientApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Гаджи\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
+    "C:\\Users\\Гаджи\\.nuget\\packages\\newtonsoft.json\\13.0.1\\newtonsoft.json.13.0.1.nupkg.sha512",
+    "C:\\Users\\Гаджи\\.nuget\\packages\\system.drawing.common\\6.0.0\\system.drawing.common.6.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

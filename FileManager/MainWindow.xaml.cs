@@ -29,7 +29,7 @@ namespace FileManager
         public List<Model> Items { get; set; }
         private SerializableClass serializableClass;
         private Stack<string> LastElements;
-        private FileViewModel viewModel = new FileViewModel();
+        private FileViewModel viewModel;
         public MainWindow()
         {
             tokenSource = new CancellationTokenSource();
@@ -42,23 +42,10 @@ namespace FileManager
             LastElements = new Stack<string>();
 
             InitializeComponent();
+            viewModel = new FileViewModel(this);
 
             DataContext = viewModel;
         }
-
-        /*private void showComputers()
-        {
-            computers = server.GetComputers();
-            string[] ID=computers.Keys.ToArray();
-            string[] name=computers.Values.ToArray();
-            Items.Clear();
-            for(int i=0;i<ID.Length;i++)
-            {
-                CompModel comp = new CompModel(name[i], "comp", ID[i]);
-                Items.Add(comp);
-                phonesList.Items.Refresh();
-            }
-        }*/
 
         private async void ListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
@@ -178,12 +165,6 @@ namespace FileManager
         private void Back_Click(object sender, RoutedEventArgs e)
         {
             viewModel.ShowComputers();//временно
-            /*if (LastElements.Count>0)
-            {
-                ShowDirs.openFileOrDir(LastElements.Pop(), Items);
-                phonesList.Items.Refresh();
-                if (LastElements.Count > 0) textBox.Text = Directory.GetParent(Items[0].Element.ToString()).ToString();
-            }*/
         }
 
         private void Items_SelectionChanged(object sender, SelectionChangedEventArgs e)
